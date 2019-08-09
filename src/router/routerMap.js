@@ -21,6 +21,7 @@ const About = Loadable({
 	loader: () => import('../pages/About'),
   loading: MyLoadingComponent
 });
+
 class RouterMap extends React.Component {
   constructor(props) {
     super(props);

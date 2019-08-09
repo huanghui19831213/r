@@ -1,5 +1,7 @@
 import { combineReducers } from 'redux';
-import example from './example'
+import searchList from './searchList'
+import menuList from './menuList'
+
 export default combineReducers({
-	example,
+	searchList,menuList
 })

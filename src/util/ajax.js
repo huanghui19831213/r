@@ -2,7 +2,8 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 import { message } from 'antd';
-
+import {createHashHistory} from 'history';
+const history = createHashHistory();
 const ajax = function (url,params,type) {
   return new Promise(function (resolve) {
     var _type = type||'json'
@@ -31,6 +32,10 @@ const ajax = function (url,params,type) {
       })
       .then((e) => {
         if(e.code==500){
+          message.error(e.msg);
+        }else if(e.code==4401){
+          localStorage.clear();
+          history.push('/login');
           message.error(e.msg);
         }else{
           resolve(e);

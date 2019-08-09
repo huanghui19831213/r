@@ -1,47 +1,67 @@
 import React, { PureComponent } from 'react';
-import { Table} from 'antd';
-
+import { Table, Input } from 'antd';
+import Ajax from '@/util/ajax'
 class About extends PureComponent {
     constructor(props){
         super(props);
         this.state = {
-            dataSource:[
-                {
-                  key: '1',
-                  name: '胡彦斌',
-                  age: 32,
-                  address: '西湖区湖底公园1号',
-                },
-                {
-                  key: '2',
-                  name: '胡彦祖',
-                  age: 42,
-                  address: '西湖区湖底公园1号',
-                },
-              ],
+            dataSource:[],
             columns:[
                 {
-                  title: '姓名',
-                  dataIndex: 'name',
-                  key: 'name',
+                  title: '公司名称',
+                  dataIndex: 'accountName',
+                  key: 'accountName',
                 },
                 {
-                  title: '年龄',
-                  dataIndex: 'age',
-                  key: 'age',
+                  title: '发送日期',
+                  dataIndex: 'sendTime',
+                  key: 'sendTime',
                 },
                 {
-                  title: '住址',
-                  dataIndex: 'address',
-                  key: 'address',
-                },
-              ]
+                  title: '提交人',
+                  dataIndex: 'createBy',
+                  key: 'createBy',
+                }
+              ],
+              pageNum:1,
+              pageSize:2,
+              signStatus:1,
+              total:0
         }
+    };
+    componentDidMount(){
+      this.getTableList();
+    };
+    getTableList(){
+      Ajax('/api/boss/contract/list',{methods: 'POST',body:{
+        'page':this.state.page,
+        'limit':this.state.limit,
+        'signStatus':this.state.signStatus,
+      }},'formData').then((e)=>{
+        this.setState({
+          dataSource:e.data,
+          total:e.count
+        })
+      })
     };
     render() {
         const state = this.state;
+        let paginationProps={
+          pageSize: this.state.pageSize,
+          current: this.state.pageNum,
+          total: this.state.total,
+          onChange: ((i)=>{
+            this.setState({
+              pageNum:i
+            });
+            this.getTableList();
+          })
+        }
         return (
-            <Table dataSource={state.dataSource} columns={state.columns} />
+          <div>
+            <div className="flex"></div>
+            <Table dataSource={state.dataSource} columns={state.columns}  rowKey="id" pagination={ paginationProps }/>
+          </div>
         );
     }
 }

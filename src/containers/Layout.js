@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux'
 import {Link} from 'react-router-dom';
 import RouterMap  from '../router/routerMap';
-
 import { Menu,Breadcrumb,Dropdown,Icon} from 'antd';
 import './Layout.less'
 const { SubMenu } = Menu;
@@ -20,22 +20,6 @@ class Layout extends PureComponent {
         super(props);
         this.state = {
             height:'',
-            menu : [
-                    {"name":"材料管理","key":"1",children:[
-                        {"name":"需要我操作","key":"1_1","path":'/main'},
-                        {"name":"需要他人操作","key":"1_2","path":'/main/News'}]
-                    },
-                    {"name":"模板管理","key":"2"},
-                    {"name":"企业管理","key":"3"},
-                    {"name":"用户管理","key":"4"},
-                    {"name":"系统管理","key":"5",children:[
-                        {"name":"部门管理","key":"5_1"},
-                        {"name":"菜单管理","key":"5_2"},
-                        {"name":"日志管理","key":"5_2_1",children:[
-                            {"name":"操作日志","key":"5_2_1_1"},
-                            {"name":"登录日志","key":"5_2_1_2","path":'/main/News'}]
-                        }]
-                    }],
             arr:[],
             selectArr:[]
         }
@@ -63,14 +47,22 @@ class Layout extends PureComponent {
         return data.map((item)=>{
             if(item.children){
                 return (
-                    <SubMenu title={item.name} key={item.key}>
+                    <SubMenu title={
+                            <span>
+                                <i className={item.icon}/>
+                                <span>{item.name}</span>
+                            </span>
+                        } key={item.key}>
                         {this.renderMenu(item.children)}
                     </SubMenu>
                 )
             }
             return (
                 <Menu.Item title={item.name} key={item.key}>
-                    <Link to={item.path||''}>{item.name}</Link>
+                    <Link to={item.path||''}>
+                        <i className={item.icon}/>
+                        {item.name}
+                    </Link>
                 </Menu.Item>
             )
         })
@@ -84,21 +76,23 @@ class Layout extends PureComponent {
         })
     };
     componentDidMount() {
-        this.renderBreadcrumb(this.state.menu)
+        this.renderBreadcrumb(this.props.data)
         this.getObj({'keyPath':['1_1','1']})
         this.setState({
             height:document.body.clientHeight-this.refs.top.scrollHeight
         })
+        // window.onresize = debounce(this.getClientWidth, 100)
     };
-    // componentWillUnmount() {
-    //     window.addEventListener('resize', ()=>{
-    //         this.setState({
-    //             height:document.body.clientHeight-document.getElementById('top').scrollHeight
-    //         })
-    //     })
-    // };
+    componentWillUnmount() {
+        window.addEventListener('resize', ()=>{
+            this.setState({
+                height:document.body.clientHeight-document.getElementById('top').scrollHeight
+            })
+        })
+    };
     render() {
         const state=this.state;
+        const props=this.props;
         return (
             <div className="layout">
                 <div className="top" id="top" ref="top">
@@ -122,7 +116,7 @@ class Layout extends PureComponent {
                         mode="inline"
                     >
                         {
-                            this.renderMenu(state.menu)
+                            this.renderMenu(props.data)
                         }
                     </Menu>
                     <div className="flex1 p20">
@@ -146,4 +140,14 @@ class Layout extends PureComponent {
         );
     }
 }
-export default Layout;
+const mapStateToProps = (state) => ({
+    data: state.menuList
+})
+  
+const mapDispatchToProps = (dispatch) => ({
+})
+  
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Layout)

@@ -5,21 +5,28 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const optimizeCss = require('optimize-css-assets-webpack-plugin')
 const isProduct = process.env.NODE_ENV ==='production'
 module.exports = {
-  optimization: {
-    splitChunks: {
-       chunks: 'all',
-       minSize: 30000,
-       minChunks: 1,
-       cacheGroups: {
-          vendor: {
-             test: /node_modules/, // 用于规定缓存组匹配的文件位置
-             name: 'vendor',
-             minSize: 30000,
-             priority: -10,//优先级
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+          minSize: 30000,
+          minChunks: 1,
+          cacheGroups: {
+              vendor: {
+                test: /node_modules/, // 用于规定缓存组匹配的文件位置
+                name: 'vendor',
+                minSize: 30000,
+                priority: -10,//优先级
+              },
+              react: {
+                name: 'react',
+                test: module => /react|redux/.test(module.context),
+                chunks: 'initial',
+                priority: 11,
+                enforce: true,
+            }
           }
-       }
-    }
- },
+        }
+    },
     entry: {
       index:path.join(__dirname, './src/index.js'),
     },
@@ -44,7 +51,6 @@ module.exports = {
             MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
         },
         {
-          // .less 解析
           test: /\.less$/,
           use: [
             MiniCssExtractPlugin.loader,
@@ -55,19 +61,26 @@ module.exports = {
           ]
         },
         {
-          test: /\.(png|jpg|gif|jpeg|ttf|svg)$/,
-          exclude: /(node_modules|bower_components)/,
-         // include: [path.resolve(__dirname, 'src/images')],
-          use: [
-            {
-              loader: 'url-loader?limit=8024', //limit 图片大小的衡量，进行base64处理
-              options: {
-                name: '[path][name].[ext]',
-              },
-            },
-          ],
+          test:/\.(jpg|png|gif|jpeg)$/,
+          use:[{
+              loader:'url-loader',
+              options:{
+                  name: '[name]_[hash].[ext]',
+                  outputPath: 'static/images/',
+                  limit:20000
+              }
+          }]
         },
-
+        {
+            test:/\.(ttf|eot|woff|woff2|svg)$/,
+            use:[{
+              loader:'file-loader',
+              options:{
+                  name: '[name]_[hash].[ext]',
+                  outputPath: 'static/css/'
+              }
+          }]
+        },
       ]
     },
     resolve: {
@@ -87,8 +100,8 @@ module.exports = {
         filename: 'index.html'
        }),
       new MiniCssExtractPlugin({
-        filename: "css/[name].[chunkhash:8].css",
-     　 chunkFilename: "[id].css"
+        filename: "[name].[chunkhash:8].css",
+     　 chunkFilename: "./static/css/[id]_[chunkhash:8].css"
       }),
       new CleanWebpackPlugin(),
       new optimizeCss()

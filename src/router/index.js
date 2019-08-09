@@ -1,8 +1,11 @@
 import React from 'react'
+import { connect } from 'react-redux';
 import {
 	HashRouter,
 	Route,
-	Switch
+	Switch,
+	Redirect ,
+	withRouter 
   } from 'react-router-dom';
 import Loadable from 'react-loadable';
 
@@ -34,18 +37,32 @@ const Login = Loadable({
 });
 class RootRouter extends React.Component{
 	render(){
+		console.log(this.props.data,283847)
 		return (
 			<HashRouter>
 				<Switch>
+					<Route path='/' exact render={()=> (<Redirect to="/Login"/> )}/>
 					<Route path="/Login" component={Login} />
 					<Route path="/Home" component={Home} />
-					<Route path="/main" component={Layout} />
+					<Route path="/main" component={this.props.data.length==0?Noffind:Layout} />
           <Route  path='*' component={Noffind}/>
 				</Switch>
 			</HashRouter>
 		)
 	}
 }
+const mapStateToProps = (state) => ({
+	data: state.menuList
+})
 
+const mapDispatchToProps = (dispatch) => ({
+	// setMenu: (value) => {
+	// 		dispatch(setMenuList(value))
+	// }
+})
 
-export default RootRouter;
+// export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RootRouter))
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(RootRouter)
